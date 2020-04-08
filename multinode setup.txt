@@ -1,0 +1,22 @@
+Master01:
+ssh -i def.pem ubuntu@13.233.9.200
+scp -i def.pem install.sh ubuntu@13.233.9.200:/home/ubuntu
+chmod u+x install.sh
+sudo bash install.sh
+
+# Init kubeadm
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+# note down kubeddm results
+sudo kubeadm join 172.26.7.128:6443 --token 0xfaha.2qadbhem6ot0lkbw     --discovery-token-ca-cert-hash sha256:adeae3c24d8cb090fa5fc7945f855a6679c50021dd869268ac1e1264b6ad8c75 
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+kubectl config set-context $(kubectl config current-context) --namespace=kube-system
+
+# Install calico network
+curl https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml -O
+kubectl apply -f calico.yaml
+
+kubectl get nodes
